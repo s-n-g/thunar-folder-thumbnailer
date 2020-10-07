@@ -1,0 +1,105 @@
+#!/bin/bash
+# This file is part of thunar-folder-thumbnailer.
+#
+# thunar-folder-thumbnailer is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Foobar is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+
+function updateAllPO(){
+    for n in *.po
+    do
+        updatePO "${n}"
+    done
+}
+
+function updatePO(){
+    local OUT
+    OUT="${1/.po/.mo}"
+    echo -n "Updating ${n} "
+    msgmerge --no-wrap -w 1000 -U "${1}" thunar-folder-thumnailer.pot || exit 1
+    echo -n "  Creating ${OUT} ... "
+    rm -f messages.mo 2>/dev/null
+    msgfmt "${n}" && {
+        echo done
+        mv messages.mo ${OUT}
+    } || rm -f messages.mo 2>/dev/null
+}
+
+
+##############################################################################
+#
+#   Script starts here
+#
+##############################################################################
+
+# development part
+if [ "$1" = "-p" ]
+then
+    shift
+    echo -n 'Creating POT file ... '
+    devel/extract-strings>po/thunar-folder-thumnailer.pot
+    echo done
+fi
+
+# update PO files
+if [ -z "$1" ]
+then
+    echo "Checking dependencies..."
+    echo -n "  gettext"
+    msgmerge --version 1>/dev/null 2>&1 && echo " ... found" || {
+        echo " ... not found"
+        exit 1
+    }
+    cd po
+    updateAllPO
+fi
+
+# installation part
+if [ "$1" = "-i" ] 
+then
+    shift
+    # search for dependencies
+    sudo echo "Checking dependencies..."
+    echo -n "  zenity"
+    zenity --version 1>/dev/null 2>&1 && echo " ... found" || {
+        echo " ... not found"
+        exit 1
+    }
+    echo -n "  imagemagick"
+    convert --version 1>/dev/null 2>&1 && echo " ... found" || {
+        echo " ... not found"
+        exit 1
+    }
+    echo "Installing files"
+    echo -n "  folder.thumbnailer -> /usr/share/thumbnailers"
+    sudo install -D folder.thumbnailer -t /usr/share/thumbnailers -o root -g root -m 644
+    echo
+    echo -n "  folder-thumbnailer -> /usr/bin"
+    sudo install -D folder-thumbnailer -t /usr/bin -o root -g root -m 755
+    echo
+    echo -n "  set-folder-icon -> /usr/local/bin"
+    sudo install -D set-folder-icon -t /usr/local/bin -o root -g root -m 755
+    echo
+    # install MO files
+    cd po
+    echo "Message catalogues installation"
+    for n in *.mo
+    do
+        OUT="${n/.po/.mo}"
+        TARGET=/usr/share/locale/"${n%.*}"/LC_MESSAGES
+        echo -n "  ${OUT} -> $TARGET"
+        cp "${OUT}" thunar-folder-thumbnailer.mo
+        sudo install -D thunar-folder-thumbnailer.mo -t ${TARGET} -o root -g root -m 644
+        echo
+    done
+    rm -f thunar-folder-thumbnailer.mo
+fi

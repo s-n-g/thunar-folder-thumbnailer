@@ -1,0 +1,261 @@
+#!/bin/bash
+# This file is part of thunar-folder-thumbnailer.
+#
+# thunar-folder-thumbnailer is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Foobar is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+
+function i18n(){
+gettext "thunar-folder-thumbnailer" "$1"
+}
+
+function usageError(){
+    echo "Usage: $(basename "$0") [dir] [image]"
+    exit 1
+}
+
+function getDir(){
+    DIR_TO_USE=$(zenity --title "${TITLE_DIR}" --file-selection --directory)
+    testDir
+}
+
+function testDir(){
+    # check DIR_TO_USE 
+    test -z "${DIR_TO_USE}" && exit
+    test -w "${DIR_TO_USE}" || {
+        zenity --width ${MSG_WIDTH} --title "${R_T}" --error --text "${FOLDER_WRITE_ERROR_L1}\n\n${FOLDER_WRITE_ERROR_L2}\"${DIR_TO_USE}\""
+        exit
+    }
+}
+
+function getFile(){
+    FILE_TO_USE=$(zenity --title "${TITLE}" --file-selection --file-filter="${FILTER}")
+    testFile
+}
+
+function testFileFromCommandLine(){
+    if [[ "$FILE_TO_USE" == *.png  ]] || [[ "$FILE_TO_USE" == *.PNG  ]] || \
+       [[ "$FILE_TO_USE" == *.jpg  ]] || [[ "$FILE_TO_USE" == *.JPG  ]] || \
+       [[ "$FILE_TO_USE" == *.svg  ]] || [[ "$FILE_TO_USE" == *.SVG  ]]
+    then
+        test -r "$FILE_TO_USE" || usageError
+    else
+        usageError
+    fi
+}
+
+function testFile(){
+    [ -z "$FILE_TO_USE" ] && exit
+    if [[ "$FILE_TO_USE" == *.png  ]] || [[ "$FILE_TO_USE" == *.PNG  ]] || \
+       [[ "$FILE_TO_USE" == *.jpg  ]] || [[ "$FILE_TO_USE" == *.JPG  ]] || \
+       [[ "$FILE_TO_USE" == *.svg  ]] || [[ "$FILE_TO_USE" == *.SVG  ]]
+    then
+        test -r "$FILE_TO_USE" || {
+            zenity --width ${MSG_WIDTH} --title "${R_T}" --error --text "${FILE_READ_ERROR_L}\n\n${FOLDER_WRITE_ERROR_L2}\"${FILE_TO_USE}\""
+            exit 1
+        }
+    else
+        zenity --width ${MSG_WIDTH} --title "${R_T}" --error --text "${INVALID_FILE_L1}\n\n${INVALID_FILE_L2}"
+        exit 1
+    fi
+}
+
+function getImageGeometry(){
+    local G
+    read WIDTH HEIGHT < <(identify -format "%w %h" "${1}")
+    ( (( WIDTH < ${IMAGE_MINIMUM_XY} )) && (( HEIGHT < ${IMAGE_MINIMUM_XY} )) ) && return 1
+    ( (( WIDTH > 256 )) || (( HEIGHT < 256 )) ) && GEOMETRY=256 || GEOMETRY=128
+    #(( WIDTH > HEIGHT )) && GEOMETRY=${GEOMETRY}x || GEOMETRY=x${GEOMETRY}
+    return 0
+}
+
+function checkIfIconExists(){
+    for fil in \
+        .folder.png \
+        .folder.jpg \
+        cover.jpg \
+        cover.png \
+        folder.jpg \
+        folder.png
+    do
+        if [ -e "${DIR_TO_USE}"/"${fil}" ]
+        then
+            [[ "${fil}" == cover.* ]] || [[ "${fil}" == .cover.* ]] && OLD_ICON="${DIR_TO_USE}"/"${fil/cover/bck-cover}"
+            [[ "${fil}" == folder.* ]] || [[ "${fil}" == .folder.* ]] && OLD_ICON="${DIR_TO_USE}"/"${fil/folder/bck-folder}"
+            if [ -w "${DIR_TO_USE}"/"${fil}" ]
+            then
+                ORIG_ICON="${DIR_TO_USE}"/"${fil}"
+                mv "${DIR_TO_USE}"/"${fil}" "${OLD_ICON}" 
+                zenity --width ${MSG_WIDTH} --title "${R_T}" --info --text "${ICON_EXISTS_L1}\n\n${ICON_EXISTS_L2}"
+                break
+            else
+                zenity --width ${MSG_WIDTH} --title "${R_T}" --info --text "${ICON_READ_ONLY_L1}\n\n${ICON_READ_ONLY_L2}"
+                exit 1
+            fi
+        fi
+    done
+}
+
+function readConfig(){
+[ -e "${HOME}"/.config/thunar-folder-thumbnailer/config ] || {
+mkdir -p "${HOME}"/.config/thunar-folder-thumbnailer
+cat > "${HOME}"/.config/thunar-folder-thumbnailer/config <<'HERE'
+# Message windows' width
+MSG_WIDTH=450
+
+# Minimum image resolution (default: 128x128)
+IMAGE_MINIMUM_XY=128
+
+## Add here any valid convert (imagemagick) option
+## https://imagemagick.org/script/convert.php
+#
+#JPG_OPTIONS="-quality 85"
+#PNG_OPTIONS="-quality 85"
+#SVG_OPTIONS="-quality 85"
+HERE
+}
+. "${HOME}"/.config/thunar-folder-thumbnailer/config 2>/dev/null
+[ -z "${MSG_WIDTH}" ] && MSG_WIDTH=450
+[ -z "${IMAGE_MINIMUM_XY}" ] && IMAGE_MINIMUM_XY=128
+}
+
+function printHelp(){
+    echo
+}
+
+function printVersion(){
+echo "$(basename $0) 0.1"
+cat <<HERE
+"Copyright (C) 2020, Spiros Georgaras <sng@hellug.gr>
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+HERE
+echo "$(basename $0) is part of thunar-folder-thumbnailer."
+cat <<HERE
+Home page: <https://www.gnu.org/software/sed/>.
+Bug reports: <https://>
+E-mail bug reports to: <sng@hellug.gr>
+HERE
+}
+
+##############################################################################
+#
+#   Script starts here
+#
+##############################################################################
+
+readConfig
+
+TITLE=$(i18n "Folder Icon: Select an Image")
+TITLE_DIR=$(i18n "Folder Icon: Select a Folder")
+FOLDER_WRITE_ERROR_L1=$(i18n "You do not have write permission to this folder!")
+FOLDER_WRITE_ERROR_L2=$(i18n "Folder: ")
+FILTER=$(i18n "Images")" (JPG, PNG, SVG) | *.JPG *.jpg *.PNG *.png *.SVG *.svg"
+R_T=$(i18n "Folder Icon")
+ICON_OK_L1=$(i18n "Folder icon installation succeeded!")
+ICON_OK_L2=$(i18n "Please refresh (press F5) Thunar's contents to see the result!!!")
+ICON_FAIL_L1=$(i18n "Folder icon installation failed!!!")
+ICON_FAIL_L2=$(i18n "Original icon restored...")
+INVALID_FILE_L1=$(i18n "Invalid file type!")
+INVALID_FILE_L2=$(i18n "The file to be used here must be a JPG, PNG or SVG image.")
+FILE_READ_ERROR_L1=$(i18n "You don't have read permission to this file!")
+FILE_READ_ERROR_L2=$(i18n "File: ")
+FILE_SMALL_L1=$(i18n "Image too small: ")
+FILE_SMALL_L2=$(i18n "Please specify an image of at least 128x128 px.")
+ICON_EXISTS_L1=$(i18n "This folder already contains a folder icon, which will be removed.")
+ICON_EXISTS_L2=$(i18n "Please refresh (press F5) Thunar's contents and then press 'OK' here.")
+ICON_READ_ONLY_L1=$(i18n "This folder already contains a folder icon, which is read only, which means it cannot be removed or changed.")
+ICON_READ_ONLY_L2=$(i18n "Please make sure that the folder icon is writable and try again.")
+
+while [ ! -z "$1" ]
+do
+    case "$1" in
+        "-h"|"--help")
+            printHelp
+            exit
+            ;;
+        "-v"|"--version")
+            printVersion
+            exit
+            ;;
+    esac
+    if [ -d "$1" ]
+    then
+        # this is a folder
+        if [ -z "${DIR_TO_USE}" ]
+        then
+            DIR_TO_USE="${1}" 
+            # can I write to it?
+            testDir
+        shift
+        else
+	    usageError
+        fi
+    elif [ -w "$1" ]
+    then
+        # this is a file
+        if [ -z "${FILE_TO_USE}" ]
+        then
+            FILE_TO_USE="$1"
+            testFileFromCommandLine
+            shift
+        else
+            usageError
+        fi
+    else
+        # unknown option
+        usageError
+    fi
+done
+
+test -z "${DIR_TO_USE}" && getDir
+test -z "${FILE_TO_USE}" && getFile
+
+checkIfIconExists
+
+if [ -z "${FILE_TO_USE}" ]
+then
+    [ -z "${ORIG_ICON}" ] || mv "${OLD_ICON}" "${ORIG_ICON}"
+else
+    getImageGeometry "${FILE_TO_USE}" || {
+        zenity --width ${MSG_WIDTH} --title "${R_T}" --error --text "${FILE_SMALL_L1}${WIDTH}x${HEIGHT}\n\n${FILE_SMALL_L2}"
+        exit 1
+    }
+    #OPTIONS="${PNG_OPTIONS}"
+    #if [[ "${FILE_TO_USE}" == *.png  ]] || [[ "${FILE_TO_USE}" == *.PNG  ]]
+    #then
+    #    # echo copy to .folder.png
+    #    OPTIONS="${JPG_OPTIONS}"
+    #elif [[ "${FILE_TO_USE}" == *.png  ]] || [[ "${FILE_TO_USE}" == *.PNG  ]]
+    #then
+    #    # echo copy to .folder.png
+    #    OPTIONS="${SVG_OPTIONS}"
+    #fi
+    #convert "${FILE_TO_USE}" ${OPTIONS} -scale $GEOMETRY  "${DIR_TO_USE}"/.folder.png
+    convert "${FILE_TO_USE}" -thumbnail $GEOMETRY  "${DIR_TO_USE}"/.folder.png
+    if (( $? == 0 ))
+    then
+        [ -z "${OLD_ICON}" ] || rm -f "${OLD_ICON}"
+        zenity --width ${MSG_WIDTH} --title "${R_T}" --info --text  "${ICON_OK_L1}\n\n${ICON_OK_L2}"
+    else
+
+        MSG="${ICON_FAIL_L1}"
+        [ -z "${OLD_ICON}" ] || {
+            mv "${ORIG_ICON}" "${OLD_ICON}"
+            MSG="${ICON_FAIL_L1}\n\n${ICON_FAIL_L2}\n\n${ICON_OK_L2}"
+        }
+        zenity --width ${MSG_WIDTH} --title "${R_T}" --error --text "${ICON_FAIL_L1}"
+    fi
+fi
+

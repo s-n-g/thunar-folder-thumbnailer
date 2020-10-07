@@ -1,0 +1,60 @@
+msgid "Folder Icon: Select an Image"
+msgstr ""
+
+msgid "Folder Icon: Select a Folder"
+msgstr ""
+
+msgid "You do not have write permission to this folder!"
+msgstr ""
+
+msgid "Folder: "
+msgstr ""
+
+msgid "Images"
+msgstr ""
+
+msgid "Folder Icon"
+msgstr ""
+
+msgid "Folder icon installation succeeded!"
+msgstr ""
+
+msgid "Please refresh (press F5) Thunar's contents to see the result!!!"
+msgstr ""
+
+msgid "Folder icon installation failed!!!"
+msgstr ""
+
+msgid "Original icon restored..."
+msgstr ""
+
+msgid "Invalid file type!"
+msgstr ""
+
+msgid "The file to be used here must be a JPG, PNG or SVG image."
+msgstr ""
+
+msgid "You don't have read permission to this file!"
+msgstr ""
+
+msgid "File: "
+msgstr ""
+
+msgid "Image too small: "
+msgstr ""
+
+msgid "Please specify an image of at least 128x128 px."
+msgstr ""
+
+msgid "This folder already contains a folder icon, which will be removed."
+msgstr ""
+
+msgid "Please refresh (press F5) Thunar's contents and then press 'OK' here."
+msgstr ""
+
+msgid "This folder already contains a folder icon, which is read only, which means it cannot be removed or changed."
+msgstr ""
+
+msgid "Please make sure that the folder icon is writable and try again."
+msgstr ""
+

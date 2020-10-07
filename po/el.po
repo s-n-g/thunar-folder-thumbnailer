@@ -1,0 +1,73 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Folder Icon: Select an Image"
+msgstr "Εικονίδιο φακέλου: Επιλέξτε μία Εικόνα"
+
+msgid "Folder Icon: Select a Folder"
+msgstr "Εικονίδιο φακέλου: Επιλέξτε ένα Φάκελο"
+
+msgid "You do not have write permission to this folder!"
+msgstr "Δεν έχετε δικαιώματα εγγραφής σε αυτό το Φάκελο!!!"
+
+msgid "Folder: "
+msgstr "Φάκελος: "
+
+msgid "Images"
+msgstr "Εικόνες"
+
+msgid "Folder Icon"
+msgstr "Εικονίδιο φακέλου"
+
+msgid "Folder icon installation succeeded!"
+msgstr "Η εγκατάσταση του εικονιδίου ολοκληρώθηκε επιτυχώς!"
+
+msgid "Please refresh (press F5) Thunar's contents to see the result!!!"
+msgstr "Παρακαλώ επαναφορτώστε τα περιεχόμενα στο παράθυρο του Thunar (πατήστε F5) για να δείτε το αποτέλεσμα."
+
+msgid "Folder icon installation failed!!!"
+msgstr "Η εγκατάσταση του εικονιδίου απέτυχε!!!"
+
+msgid "Original icon restored..."
+msgstr "Επαναφέρθηκε το αρχικό εικονίδιο..."
+
+msgid "Invalid file type!"
+msgstr "Μη έγκυρος τύπος αρχείου!"
+
+msgid "The file to be used here must be a JPG, PNG or SVG image."
+msgstr "Το αρχείο θα πρέπει να είναι μία εικόνα JPG, PNG ή SVG."
+
+msgid "You don't have read permission to this file!"
+msgstr "Δεν έχετε δικαιώματα πρόσβασης σε αυτό το Φάκελο!!!"
+
+msgid "File: "
+msgstr "Αρχείο: "
+
+msgid "Image too small: "
+msgstr "Η εικόνα είναι πολύ μικρή: "
+
+msgid "Please specify an image of at least 128x128 px."
+msgstr "Παρακαλώ επιλέξτε μία εικόνα με διαστάσεις τουλάχιστον 128x128 px."
+
+msgid "This folder already contains a folder icon, which will be removed."
+msgstr "Αυτός ο φάκελος περιέχει ήδη ένα εικονίδιο φακέλου, το οποίο και θα διαγραφεί."
+
+msgid "Please refresh (press F5) Thunar's contents and then press 'OK' here."
+msgstr "Παρακαλώ επαναφορτώστε τα περιεχόμενα στο παράθυρο του Thunar (πατήστε F5) και στη συνέχεια πατήστε 'Εντάξει' εδώ."
+
+msgid "This folder already contains a folder icon, which is read only, which means it cannot be removed or changed."
+msgstr "Αυτός ο φάκελος περιέχει ήδη ένα εικονίδιο φακέλου, το οποίο δεν είναι εγγράψιμο, πράγμα που σημαίνει ότι δεν μπορεί να διαγραφεί ή να τροποποιηθεί."
+
+msgid "Please make sure that the folder icon is writable and try again."
+msgstr "Παρακαλώ σιγουρευτείτε ότι το εικονίδιο είναι εγγράψιμο και δοκιμάστε ξανά."
+
+#~ msgid "Please reload file contents to see the result!!!"
+#~ msgstr "Παρακαλώ κάντε επαναφόρτωση του περιεχομένου για να δείτε το αποτέλεσμα!!!"
